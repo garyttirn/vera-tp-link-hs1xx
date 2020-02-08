@@ -6,6 +6,7 @@ Implementation file for Vera home automaton system and TP-Link HS1xx WiFi-plug i
 
 Upload implementation file I_TP-Link-HS1xx-Switch.xml to Vera via the Web UI from menu :
 Apps->Develop apps->Luup files->Upload
+https://support.getvera.com/hc/en-us/articles/360021950473-Apps-Tab-Plug-Ins
 
 Then you can create the TP-Link HS1xx device using this URL from browser, filling in appropriate values to VERA-IPADDRESS and PLUG-IPADDRESS.
 
