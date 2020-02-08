@@ -1,0 +1,94 @@
+<?xml version="1.0"?>
+<implementation>
+	<functions>
+		-- Create TP-Link HS1xx-switch device
+		-- http://VERA_IPADDRESS:3480/data_request?id=action&amp;serviceId=urn:micasaverde-com:serviceId:HomeAutomationGateway1&amp;action=CreateDevice&amp;
+		-- deviceType=urn:schemas-upnp-org:device:BinaryLight:1&amp;internalID=&amp;Description=TP-Link%20HS1xx&amp;
+		-- UpnpDevFilename=D_BinaryLight1.xml&amp;UpnpImplFilename=I_TP-Link-HS1xx-Switch.xml&amp;RoomNum=0&amp;Reload=1&amp;IpAddress=SWITCH-IPADDRESS
+        
+		-- Version 30.11.2018. Test with Hardware: HS100 V2.0 SW : 1.5.4 Build 180815 Rel.121440
+
+		-- globals
+		local lug_device = 0
+
+                -- TP-Link protocol functions borrowed from https://github.com/Alex-developer/hs1xx with updates (lenght encoded properly)       
+                -- Encode the data for the plug using a autokey cipher
+                -- Use an inital vector of -85 (171)
+                function tpEndcodeData(strData)
+                	local bit = require("bit")
+                        local key = 171
+
+                        result = "\0\0\0" .. string.char(string.len(strData))
+
+                        for i = 1, #strData do
+                                local ord = string.byte( strData, i )
+
+                                local val = bit.bxor(key, ord)
+                                key = val
+                                result = result .. string.char(val)
+                        end
+
+                        return result
+                end
+
+		-- Turn the plug on
+		function turnPlugOn()
+    			strCommand = '{"system":{"set_relay_state":{"state":1}}}'
+    			sendData(strCommand)
+			luup.log("TP-Link HS1xx switch, device #".. lug_device ..", name: '".. luup.devices[lug_device].description .."' turned on.")
+		end
+
+		-- Turn the plug off
+		function turnPlugOff()
+    			strCommand = '{"system":{"set_relay_state":{"state":0}}}'
+    			sendData(strCommand)
+			luup.log("TP-Link HS1xx switch, device #".. lug_device ..", name: '".. luup.devices[lug_device].description .."' turned off.")
+		end
+
+		function sendData(strCommand)
+			host = luup.devices[lug_device].ip or ""
+
+  			local socket = require("socket")
+  			local tcp = socket.tcp()
+
+  			tcp:settimeout(2)
+
+  			if (tcp:connect(host, 9999)) then
+     				if (tcp:send(tpEndcodeData(strCommand))) then
+     				else
+				   luup.log("TP-Link HS1xx: Error Sending Msg")
+     				end
+  			else
+     				luup.log("TP-Link HS1xx: Error Opening Socket")
+  			end
+
+  			tcp:close(socket)
+		end
+
+		function startup (lul_device)
+			lug_device = lul_device
+			lug_devName = luup.devices[lug_device].description
+			luup.log("TP-Link HS1xx switch, device #".. lug_device ..", name: '".. luup.devices[lug_device].description .."'.")
+ 			luup.set_failure(false, lug_device)
+		end
+	</functions>
+	<startup>startup</startup>
+	<actionList>
+		<action>
+			<serviceId>urn:upnp-org:serviceId:SwitchPower1</serviceId>
+			<name>SetTarget</name>
+			<run>
+			luup.variable_set("urn:upnp-org:serviceId:SwitchPower1", "Status", lul_settings.newTargetValue, lul_device)
+
+			if (lul_settings.newTargetValue == "1") then
+				turnPlugOn()
+			else
+				turnPlugOff()
+			end
+ 
+			--return success (4), or failure (2)
+			return 4
+			</run>
+		</action>
+	</actionList>
+</implementation>
