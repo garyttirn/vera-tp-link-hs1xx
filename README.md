@@ -2,25 +2,27 @@
 
 Implementation file for Vera home automaton system and TP-Link HS1xx WiFi-plug integration
 
-Test with Amcrest IP2M-841, IP4M-1051 & IP3M-943 (no PTZ)
+## Installation ##
 
-Upload I*.xml files to Vera via Vera Web UI, seletion Apps->Develop apps->Luup files->Upload
+Upload implementation file I_TP-Link-HS1xx-Switch.xml to Vera via the Web UI from menu :
+Apps->Develop apps->Luup files->Upload
 
-Create Camera device via LUUP call from Browser or curl	   
-	http://VERA_IPADDRESS:3480/data_request?id=action&serviceId=urn:micasaverde-com:serviceId:HomeAutomationGateway1&action=CreateDevice&deviceType=urn:schemas-upnp-org:device:DigitalSecurityCamera:2&internalID=&Description=Amcrest%20Camera&UpnpDevFilename=D_DigitalSecurityCamera2.xml&UpnpImplFilename=I_Amcrest_ProHD.xml&MacAddress=&RoomNum=0&Reload=1&IpAddress=CAM-IPADDRESS
+Then you can create the TP-Link HS1xx device using this URL from browser, filling in appropriate values to VERA-IPADDRESS and PLUG-IPADDRESS.
 
-Create Motion sensor device
-http://VERA_IPADDRESS:3480/data_request?id=action&serviceId=urn:micasaverde-com:serviceId:HomeAutomationGateway1&action=CreateDevice&deviceType=urn:schemas-micasaverde-com:device:MotionSensor:1&internalID=&Description=Camera%20motion%20sensor&UpnpDevFilename=D_MotionSensor1.xml&UpnpImplFilename=&IpAddress=&MacAddress=&RoomNum=0&Reload=1&DeviceNumParent=CAMERA-DEVICE-ID*
+http://VERA-IPADDRESS:3480/data_request?id=action&serviceId=urn:micasaverde-com:serviceId:HomeAutomationGateway1&action=CreateDevice&deviceType=urn:schemas-upnp-org:device:BinaryLight:1&internalID=&Description=TP-Link%20HS-1xx&UpnpDevFilename=D_BinaryLight1.xml&UpnpImplFilename=I_TP-Link-HS1xx-Switch.xml&RoomNum=0&Reload=1&IpAddress=PLUG-IPADDRESS
 
-Force set camera credentials
-	http://VERA_IPADDRESS:3480/data_request?id=variableset&DeviceNum=CAMERA-DEVICE-ID&Variable=username&Value=USERID
-	http://VERA_IPADDRESS:3480/data_request?id=variableset&DeviceNum=CAMERA-DEVICE-ID&Variable=password&Value=PASSWORD
+TP-Link-HS1xx needs to have static IP assigned in the router it connects to and the Kasa (TP-Link) app should not be used as connecting may disable the local mode this 
+Tested on Vera Edge using HS100 V2.0 SW version 1.5.4 Build 180815 Rel.121440
 
-Delete device
-	http://VERA_IPADDRESS:3480/data_request?id=device&action=delete&device=SENSOR-DEVICE-ID
+## Other Information ##
 
-Set as implementation file for a exting camera :
-	Camera->Advanced Settings->Extra Parameters->impl_file
+The implementation uses the same Smart Home protocol as this python tool
+https://github.com/softScheck/tplink-smartplug
+
+That is very useful tool for setting up the plug initially
+
+   `tplink_smartplug.py -t 192.168.0.1 -j '{"netif":{"set_stainfo":{"ssid":"<WIFI SSID>","password":"<WIFI PASSWORD","key_type":3}}}'`
+
 
 Discussion on Vera forums :
-https://community.getvera.com/t/amcrest-prohd-1080p/193000
+https://community.getvera.com/t/tp-link-smart-plug-hs110/193678/9
