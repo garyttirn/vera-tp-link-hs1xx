@@ -2,7 +2,7 @@
 
 Implementation file for Vera home automation system and TP-Link HS1xx WiFi-plug integration
 
-** NOTE! Firmware version 1.1 is know to break TP-Link HS1xx local integration **
+**NOTE! Firmware version 1.1 is known to break TP-Link HS1xx local integration**
 
 More information here :
 
